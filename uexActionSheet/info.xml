@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<uexplugins>
+    <plugin
+        uexName="uexActionSheet" version="3.0.2" build="2">
+		<info>2:修复背景图片太大时，列表太高的问题</info>
+		<build>1:修改设置的字体高亮颜色不生效的问题</build>
+        <build>0:ActionSheet插件</build>
+    </plugin>
+</uexplugins>

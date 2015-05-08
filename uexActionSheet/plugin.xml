@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<uexplugins>
+	<plugin
+	    className="org.zywx.wbpalmstar.plugin.uexActionSheet.EUExActionSheet" 
+	    uexName="uexActionSheet" version="3.0" build="0">
+	    <method name="open"/>
+	</plugin>
+</uexplugins>
