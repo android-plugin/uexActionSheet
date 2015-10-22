@@ -6,13 +6,18 @@ import org.zywx.wbpalmstar.base.BUtility;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.plugin.uexActionSheet.ActionSheetDialog.ActionSheetDialogItemClickListener;
+
 import android.app.ActivityGroup;
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Message;
 
 public class EUExActionSheet extends EUExBase {
 
     public static final String CALLBACK_RESULT_DATA = "uexActionSheet.onClickItem";
-	private String[] m_inButtonLables;
+    private static final int MSG_OPEN = 1;
+    private static final String TAG_PARAM = "data";
+    private String[] m_inButtonLables;
 	private String m_inCancel = "取消";
 	public EUExActionSheet(Context context, EBrowserView inParent) {
 		super(context, inParent);
@@ -22,9 +27,19 @@ public class EUExActionSheet extends EUExBase {
 	protected boolean clean() {
 		return false;
 	}
-	public void open(String[] params){
-		if(params.length != 5)
-			return;
+
+    public void open(String[] params){
+        if(params == null || params.length < 5)
+            return;
+        Message msg = new Message();
+        msg.what = MSG_OPEN;
+        Bundle bd = new Bundle();
+        bd.putStringArray(TAG_PARAM, params);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+	public void openMsg(String[] params){
 		try {
 			final float x = Float.parseFloat(params[0]);
 			final float y = Float.parseFloat(params[1]);
@@ -50,22 +65,17 @@ public class EUExActionSheet extends EUExBase {
 						mBrwView.getCurrentWidget().m_widgetPath,
 						mBrwView.getCurrentWidget().m_wgtType));
 			}
-			((ActivityGroup) mContext).runOnUiThread(new Runnable() {
-
-				@Override
-				public void run() {
-					ArrayList<String> dataList = dialogData.getListStr();
-					if(dataList != null)
-						m_inButtonLables = (String[])(dataList.toArray(new String[dataList.size()]));
-					actionSheet((int)x,(int)y,(int)w,(int)h,dialogData);
-				}
-			});
-
+            ArrayList<String> dataList = dialogData.getListStr();
+            if (dataList != null)
+                m_inButtonLables = (String[]) (dataList.toArray(new String[dataList.size()]));
+            actionSheet((int) x, (int) y, (int) w, (int) h, dialogData);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	
 	}
+
+
 	
 	private void actionSheet(int x,int y,int width,int height,DialogData dialogData) {
 		ActionSheetDialog.show(mContext, m_inButtonLables, "", m_inCancel,
@@ -87,4 +97,19 @@ public class EUExActionSheet extends EUExBase {
 					}
 				},x,y,width,height,dialogData);
 	}
+
+    @Override
+    public void onHandleMessage(Message message) {
+        if(message == null){
+            return;
+        }
+        Bundle bundle=message.getData();
+        switch (message.what) {
+            case MSG_OPEN:
+                openMsg(bundle.getStringArray(TAG_PARAM));
+                break;
+            default:
+                super.onHandleMessage(message);
+        }
+    }
 }
