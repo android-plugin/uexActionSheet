@@ -7,7 +7,6 @@ import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.plugin.uexActionSheet.ActionSheetDialog.ActionSheetDialogItemClickListener;
 
-import android.app.ActivityGroup;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Message;
@@ -35,6 +34,7 @@ public class EUExActionSheet extends EUExBase {
         msg.what = MSG_OPEN;
         Bundle bd = new Bundle();
         bd.putStringArray(TAG_PARAM, params);
+        msg.obj = this;
         msg.setData(bd);
         mHandler.sendMessage(msg);
     }
@@ -72,7 +72,7 @@ public class EUExActionSheet extends EUExBase {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	
+
 	}
 
 
