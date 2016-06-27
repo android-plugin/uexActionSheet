@@ -1,12 +1,28 @@
-apply plugin: 'com.android.application'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.0'
 
-dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
 }
 
+apply plugin: 'com.android.application'
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+dependencies {
+    compile(name: "Engine-system-debug-4.0.0", ext: 'aar')
+}
 android {
     compileSdkVersion 22
-    buildToolsVersion "23.0.0"
+    buildToolsVersion "23.0.2"
     lintOptions {
         abortOnError false
     }
@@ -39,3 +55,5 @@ android {
         release.setRoot('build-types/release')
     }
 }
+
+apply from: "https://raw.githubusercontent.com/android-plugin/gradle-plugin/master/buildPlugin.gradle"

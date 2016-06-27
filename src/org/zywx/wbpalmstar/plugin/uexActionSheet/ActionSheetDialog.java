@@ -1,12 +1,5 @@
 package org.zywx.wbpalmstar.plugin.uexActionSheet;
 
-import java.util.ArrayList;
-import org.zywx.wbpalmstar.base.ResoureFinder;
-import org.zywx.wbpalmstar.base.cache.BytesArrayFactory$BytesArray;
-import org.zywx.wbpalmstar.base.cache.ImageLoadTask;
-import org.zywx.wbpalmstar.base.cache.ImageLoadTask$ImageLoadTaskCallback;
-import org.zywx.wbpalmstar.base.cache.ImageLoaderManager;
-import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -20,10 +13,10 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -32,6 +25,13 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import org.zywx.wbpalmstar.base.ACEImageLoader;
+import org.zywx.wbpalmstar.base.ResoureFinder;
+import org.zywx.wbpalmstar.base.listener.ImageLoaderListener;
+import org.zywx.wbpalmstar.engine.universalex.EUExUtil;
+
+import java.util.ArrayList;
 
 public class ActionSheetDialog extends Dialog implements OnClickListener,
 		OnItemClickListener {
@@ -50,7 +50,7 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 	public static final int ANIM_TIME = 300;
 	private ResoureFinder finder;
 	private DialogData mDialogData;
-	private ImageLoaderManager imgLoadMgr;
+	private ACEImageLoader imgLoadMgr;
 	private Context mContext;
 	private Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
@@ -77,7 +77,7 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 		this.mContext = context;
 		finder = ResoureFinder.getInstance(context);
 		inflater = LayoutInflater.from(context);
-		imgLoadMgr = ImageLoaderManager.initImageLoaderManager(context);
+		imgLoadMgr = ACEImageLoader.getInstance();
 		init(x, y, width, height);
 	}
 
@@ -152,27 +152,27 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 								.getResDrawableID("plugin_uexactionsheet_menu_bg_color_style"));
 				window_back.setBackgroundDrawable(gradientFrameBound);
 			} else if (!TextUtils.isEmpty(mDialogData.getFramBgImg())) {
-				Bitmap frameBitmap = imgLoadMgr.getCacheBitmap(mDialogData
-						.getFramBgImg());
+                Bitmap frameBitmap = imgLoadMgr.getBitmapSync(mDialogData
+                        .getFramBgImg());
 				if (frameBitmap == null) {
-					ActionSheetImageTask actionSheetImageTask = new ActionSheetImageTask(
-							mContext, mDialogData.getFramBgImg(),
-							mDialogData.getIsAngle());
-					actionSheetImageTask
-							.addCallback(new ImageLoadTask$ImageLoadTaskCallback() {
-
-								@Override
-								public void onImageLoaded(ImageLoadTask arg0,
-										Bitmap bitmap) {
-									if (bitmap != null) {
-										BitmapDrawable bd = new BitmapDrawable(
-												bitmap);
-										window_back.setBackgroundDrawable(bd);
-									}
-								}
-
-							});
-					imgLoadMgr.asyncLoad(actionSheetImageTask);
+//					ActionSheetImageTask actionSheetImageTask = new ActionSheetImageTask(
+//							mContext, mDialogData.getFramBgImg(),
+//							mDialogData.getIsAngle());
+                    imgLoadMgr.getBitmap(mDialogData.getFramBgImg(), new ImageLoaderListener() {
+                        @Override
+                        public void onLoaded(Bitmap bitmap) {
+                            if(bitmap != null) {
+                                BitmapDrawable bd = new BitmapDrawable(
+                                        bitmap);
+                                if ("Y".equals(mDialogData.getIsAngle())) {
+                                    Bitmap bitmapTemp  = ImageColorUtils
+                                            .getRoundedBitmap(bitmap);
+                                    bd = new BitmapDrawable(bitmap);
+                                }
+                                window_back.setBackgroundDrawable(bd);
+                            }
+                        }
+                    });
 				} else {
 					BitmapDrawable bd = new BitmapDrawable(frameBitmap);
 					window_back.setBackgroundDrawable(bd);
@@ -335,37 +335,6 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 		void onCanceled(ActionSheetDialog dialog);
 	}
 
-	private class ActionSheetImageTask extends ImageLoadTask {
-
-		private String mImageUrl;
-		private String mIsAngle;
-
-		public ActionSheetImageTask(Context context, String imgUrl,
-				String isAngle) {
-			super(imgUrl);
-			this.mImageUrl = imgUrl;
-			this.mIsAngle = isAngle;
-		}
-
-		@Override
-		protected Bitmap doInBackground() {
-			Bitmap myoriginalImage = ImageColorUtils.getImage(mContext,
-					mImageUrl);
-			if ("Y".equals(mIsAngle)) {
-				myoriginalImage = ImageColorUtils
-						.getRoundedBitmap(myoriginalImage);
-			}
-			return myoriginalImage;
-		}
-
-		@Override
-		protected BytesArrayFactory$BytesArray transBitmapToBytesArray(
-				Bitmap arg0) {
-			return null;
-		}
-
-	}
-	
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         // TODO Auto-generated method stub
