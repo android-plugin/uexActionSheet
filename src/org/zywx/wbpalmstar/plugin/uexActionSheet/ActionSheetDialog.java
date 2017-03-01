@@ -6,6 +6,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -40,7 +42,7 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 	// private TextView tvTitle;
 	private LinearLayout dialog_cancelBtn_parent, window_back;
 	private ListView lvBtnList;
-	private Button btnCancel;
+	private TextView btnCancel;
 	private ListAdapter lisAdapter;
 	private boolean mCloseByBackKey;
 	private ActionSheetDialogItemClickListener listener;
@@ -101,7 +103,6 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 				.inflate(finder
 						.getLayoutId("plugin_uexactionsheet_dialog_layout"),
 						null);
-
 		if (width == 0) {
 			setContentView(view);
 		} else {
@@ -110,7 +111,7 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 			setContentView(view, lp);
 		}
 		// tvTitle = (TextView) findViewById(finder.getId("dialog_title"));
-		btnCancel = (Button) findViewById(finder.getId("dialog_cancel_button"));
+		btnCancel = (TextView) findViewById(finder.getId("dialog_cancel_button"));
 		btnCancel.setOnClickListener(this);
 		btnCancel.setTextSize(mDialogData.getTextSize());
 		int normal = ImageColorUtils.parseColor(mDialogData.getCancelTextNColor());
@@ -208,7 +209,14 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 		}
 	}
 
-	@Override
+
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+    }
+
+    @Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			mCloseByBackKey = true;
@@ -226,6 +234,22 @@ public class ActionSheetDialog extends Dialog implements OnClickListener,
 		}
 		lisAdapter = new ListAdapter(list);
 		lvBtnList.setAdapter(lisAdapter);
+		lvBtnList.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if (lvBtnList.getHeight()!=0) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        lvBtnList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }else{
+                        lvBtnList.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    }
+                }else{
+                    if (lisAdapter!=null) {
+                        lisAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        });
 	}
 
 	@Override
