@@ -1,8 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <uexplugins>
     <plugin
-        uexName="uexActionSheet" version="4.0.2" build="2">
-        <info>2:修复在ready里面打开高度不对的问题</info>
+        uexName="uexActionSheet" version="4.3.3" build="2020121101">
+        <info>3:适配新引擎，修复打包失败问题</info>
+        <build>2:修复在ready里面打开高度不对的问题</build>
         <build>1:去掉多余资源，解决编译错误</build>
         <build>0:ActionSheet插件</build>
     </plugin>
