@@ -5,11 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
+import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.base.BUtility;
+import org.zywx.wbpalmstar.platform.certificates.Http;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -29,6 +27,8 @@ import android.text.TextUtils;
 
 public class ImageColorUtils {
 
+	private static final String TAG = "ImageColorUtils";
+	
 	public static int parseColor(String colorStr) {
 		if (TextUtils.isEmpty(colorStr))
 			return 0;
@@ -151,15 +151,22 @@ public class ImageColorUtils {
 	private static byte[] downloadImageFromNetwork(String url) {
 		InputStream is = null;
 		byte[] data = null;
+		HttpURLConnection httpURLConnection;
 		try {
-			HttpGet httpGet = new HttpGet(url);
-			BasicHttpParams httpParams = new BasicHttpParams();
-			HttpResponse httpResponse = new DefaultHttpClient(httpParams)
-					.execute(httpGet);
-			int responseCode = httpResponse.getStatusLine().getStatusCode();
+			httpURLConnection = Http.getHttpsURLConnection(url);
+			httpURLConnection.setRequestMethod("GET");
+			httpURLConnection.setUseCaches(false);
+			httpURLConnection.setDoOutput(true);
+			httpURLConnection.setDoInput(true);
+			httpURLConnection.setConnectTimeout(30000);
+			httpURLConnection.setReadTimeout(30000);
+			httpURLConnection.connect();
+			int responseCode = httpURLConnection.getResponseCode();
 			if (responseCode == HttpURLConnection.HTTP_OK) {
-				is = httpResponse.getEntity().getContent();
+				is = httpURLConnection.getInputStream();
 				data = transStreamToBytes(is, 4096);
+			}else{
+				BDebug.w(TAG, "httpURLConnection fail, status code = " + responseCode);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -267,7 +274,7 @@ public class ImageColorUtils {
 	/**
 	 * 更改bitmap颜色值
 	 * 
-	 * @param final_bitmap
+	 * @param from_bitmap
 	 * @param color
 	 * @return
 	 */

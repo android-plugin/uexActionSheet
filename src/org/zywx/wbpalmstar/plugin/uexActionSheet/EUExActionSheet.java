@@ -18,6 +18,7 @@ public class EUExActionSheet extends EUExBase {
     private static final String TAG_PARAM = "data";
     private String[] m_inButtonLables;
 	private String m_inCancel = "取消";
+
 	public EUExActionSheet(Context context, EBrowserView inParent) {
 		super(context, inParent);
 	}
